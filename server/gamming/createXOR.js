@@ -8,8 +8,12 @@ const exec = async (text, key) => {
     text = text.split(" ")
     key = key.split(" ")
 
-    const encodedStr = await encodeBinaryText(text, key, 0)
-    return encodedStr.join(" ")
+    let encodedStr = await encodeBinaryText(text, key, 0)
+    encodedStr = encodedStr.join(" ")
+    if (!encodedStr[encodedStr.length -1]) {
+        encodedStr = encodedStr.slice(0, -1)
+    }
+    return encodedStr
 }
 
 /**

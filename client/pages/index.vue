@@ -97,20 +97,6 @@ export default {
     generateRandomKey() {
       this.randomKey = generateRandomString(this.userInputData.length);
     },
-    async decode() {
-      const payload = {
-        text: this.encodedResult,
-        key: textToBinary(this.randomKey),
-      };
-
-      try {
-        const response = await cryptoApi.transcodeApiEndpoint(payload);
-        this.decodedResult = binaryToChar(response?.transcodedResult);
-      } catch (e) {
-        console.log('e', e);
-        this.handleErrorMessage(getErrorMessage(e));
-      }
-    },
     async encode() {
       const payload = {
         text: textToBinary(this.userInputData),
@@ -120,6 +106,20 @@ export default {
       try {
         const response = await cryptoApi.transcodeApiEndpoint(payload);
         this.encodedResult = response?.transcodedResult;
+      } catch (e) {
+        console.log('e', e);
+        this.handleErrorMessage(getErrorMessage(e));
+      }
+    },
+    async decode() {
+      const payload = {
+        text: this.encodedResult,
+        key: textToBinary(this.randomKey),
+      };
+
+      try {
+        const response = await cryptoApi.transcodeApiEndpoint(payload);
+        this.decodedResult = binaryToChar(response?.transcodedResult);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));

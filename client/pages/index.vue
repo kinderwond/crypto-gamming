@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { generateRandomString, textToBinary, binaryToChar } from '@/utils/utils';
+import { generateRandomString, textToBinary, binaryToChar, getErrorMessage } from '@/utils/utils';
 import * as cryptoApi from '@/services/crypto-api';
 
 export default {
@@ -108,6 +108,7 @@ export default {
         this.decodedResult = binaryToChar(response?.transcodedResult);
       } catch (e) {
         console.log('e', e);
+        this.handleErrorMessage(getErrorMessage(e));
       }
     },
     async encode() {
@@ -115,12 +116,21 @@ export default {
         text: textToBinary(this.userInputData),
         key: textToBinary(this.randomKey),
       };
+
       try {
         const response = await cryptoApi.transcodeApiEndpoint(payload);
         this.encodedResult = response?.transcodedResult;
       } catch (e) {
         console.log('e', e);
+        this.handleErrorMessage(getErrorMessage(e));
       }
+    },
+    handleErrorMessage(error) {
+      this.$notify({
+        group: 'main',
+        type: 'error',
+        text: error,
+      });
     },
     downloadKey() {
       this.createBlobFromContentAndDownloadFile(this.randomKey, 'generated-key');

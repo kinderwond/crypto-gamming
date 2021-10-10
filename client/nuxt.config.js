@@ -21,15 +21,10 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['~assets/stylesheets/main.sass'],
+  css: ['~assets/stylesheets/main.scss'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-    '@/plugins/axios',
-    // new ESLintPlugin({
-    //   eslintPath: '.eslintrc.js',
-    // }),
-  ],
+  plugins: ['@/plugins/axios', { src: '~/plugins/notifications-client', ssr: false }],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

@@ -40,3 +40,21 @@ export function binaryToChar(binStr) {
     .map((bin) => String.fromCharCode(parseInt(bin, 2))) //Map every binary char to real char
     .join('');
 }
+
+/**
+ * Extracts error message from server-side error response object
+ * @param {object, string} error
+ * @returns {string}
+ */
+export function getErrorMessage(error) {
+  if (typeof error === 'object') {
+    return (
+      (error.response && error.response.data) ||
+      (error.response && error.response.message) ||
+      error.message ||
+      error.errorMessage ||
+      error.error
+    );
+  }
+  return error || 'Server error';
+}

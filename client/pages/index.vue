@@ -16,7 +16,16 @@
         >
           Generate random key
         </button>
-        <p v-if="randomKey" class="mt-2">Random key is {{ randomKey }}</p>
+        <label class="label mt-2">Random key is</label>
+        <div class="control mt-2">
+          <input
+            v-model="randomKey"
+            :disabled="isDownloadKeyDisabled"
+            class="input"
+            type="text"
+            placeholder="Enter you random key"
+          />
+        </div>
       </div>
     </div>
 

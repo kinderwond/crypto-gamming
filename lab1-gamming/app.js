@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
       msg: 'Hello World!'
     })
 })
-app.post("/encode", jsonParser, async (req, res) => {
+app.post("/transcode", jsonParser, async (req, res) => {
     
     try {
         console.log(req.body);
@@ -23,7 +23,7 @@ app.post("/encode", jsonParser, async (req, res) => {
         const {text, key} = req.body 
         const encoded = await gamming(text, key)
         res.status(200).json({
-            encoded
+          transcodedResult: encoded
         })
     }catch (e) {
         console.log(`Erroe`);

@@ -29,7 +29,7 @@
         >
           Encode
         </button>
-        <p>Result of encode is {{ encodedResultComputed }}</p>
+        <p>Result of encode is {{ encodedResultToChar }}</p>
       </div>
       <div class="column">
         <button
@@ -61,8 +61,8 @@
 </template>
 
 <script>
-import { Http } from '@/plugins/axios';
 import { generateRandomString, textToBinary, binaryToChar } from '@/utils/utils';
+import * as cryptoApi from '@/services/crypto-api';
 
 export default {
   data: function() {
@@ -86,7 +86,7 @@ export default {
     isDownloadEncryptedDataDisabled() {
       return !this.encodedResult;
     },
-    encodedResultComputed() {
+    encodedResultToChar() {
       return binaryToChar(this.encodedResult);
     },
     encodedWarning() {
@@ -104,10 +104,8 @@ export default {
       };
 
       try {
-        const response = await Http.post('/encode', {
-          ...payload,
-        });
-        this.decodedResult = binaryToChar(response?.data?.encoded);
+        const response = await cryptoApi.transcodeApiEndpoint(payload);
+        this.decodedResult = binaryToChar(response?.transcodedResult);
       } catch (e) {
         console.log('e', e);
       }
@@ -118,10 +116,8 @@ export default {
         key: textToBinary(this.randomKey),
       };
       try {
-        const response = await Http.post('/encode', {
-          ...payload,
-        });
-        this.encodedResult = response?.data?.encoded;
+        const response = await cryptoApi.transcodeApiEndpoint(payload);
+        this.encodedResult = response?.transcodedResult;
       } catch (e) {
         console.log('e', e);
       }
@@ -130,7 +126,7 @@ export default {
       this.createBlobFromContentAndDownloadFile(this.randomKey, 'generated-key');
     },
     downloadEncryptedData() {
-      this.createBlobFromContentAndDownloadFile(this.encodedResult, 'encoded-data');
+      this.createBlobFromContentAndDownloadFile(this.encodedResultToChar, 'encoded-data');
     },
     createBlobFromContentAndDownloadFile(content, fileName) {
       const blob = new Blob([content], { type: 'text/plain' });

@@ -23,10 +23,6 @@ app.post("/transcode", jsonParser, async (req, res) => {
         // get text in binary
         const { text, key } = req.body
         const encoded = await gamming(text, key)
-        encoded = encoded.join(" ")
-        if (!encoded[encoded.length - 1]) {
-            encoded = encoded.slice(0, -1)
-        }
         res.status(200).json({
             transcodedResult: encoded
         })

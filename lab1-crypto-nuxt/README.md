@@ -3,6 +3,9 @@
 ## Build Setup
 
 ```bash
+# setup .env
+$ yarn prebuild:development
+
 # install dependencies
 $ yarn install
 

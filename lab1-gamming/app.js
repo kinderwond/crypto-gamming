@@ -2,8 +2,8 @@ const express = require('express')
 const cors = require("cors")
 const {gamming} = require("./gamming")
 const port = 3022
-var bodyParser = require('body-parser')
-var jsonParser = bodyParser.json()
+const bodyParser = require('body-parser')
+const jsonParser = bodyParser.json()
  
 // create application/x-www-form-urlencoded parser
 
@@ -11,7 +11,9 @@ const app = express()
 app.use(cors())
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
+    res.send({
+      msg: 'Hello World!'
+    })
 })
 app.post("/encode", jsonParser, async (req, res) => {
     

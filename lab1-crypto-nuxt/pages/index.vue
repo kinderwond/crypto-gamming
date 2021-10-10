@@ -1,33 +1,59 @@
 <template>
   <div class="p-3">
-    <h1 class="title has-text-centered">Hello epta</h1>
+    <h1 class="title has-text-centered">Welcome to the application!</h1>
 
-    <button class="button is-primary is-light" @click="generateRandomKey">
-      Generate random key
-    </button>
-    <p v-if="randomKey">Random key is {{ randomKey }}</p>
     <label class="label mt-2">Enter you data</label>
     <div class="control">
-      <input
-        v-model="text"
-        class="input"
-        type="text"
-        placeholder="Enter you data"
-      />
+      <input v-model="userInputData" class="input" type="text" placeholder="Enter you data" />
     </div>
 
-    <div>
-      <button class="button mt-2 is-primary" @click="encode">Encode</button>
-      <p>Result of encode is {{ encodedResult }}</p>
-      <button class="button mt-2 is-primary" @click="decode">Decode</button>
-      <p>Result of decode is {{ decodedResult }}</p>
+    <div class="columns">
+      <div class="column">
+        <button
+          :disabled="isGenerateKeyDisabled"
+          class="button is-primary is-light"
+          @click="generateRandomKey"
+        >
+          Generate random key
+        </button>
+        <p v-if="randomKey" class="mt-2">Random key is {{ randomKey }}</p>
+      </div>
     </div>
+
+    <div class="columns">
+      <div class="column">
+        <button
+          :disabled="isEncryptDecryptControlsDisabled"
+          class="button mt-2 is-primary is-one-fifth"
+          @click="encode"
+        >
+          Encode
+        </button>
+        <p>Result of encode is {{ encodedResultComputed }}</p>
+      </div>
+      <div class="column">
+        <button
+          :disabled="isEncryptDecryptControlsDisabled"
+          class="button mt-2 is-primary"
+          @click="decode"
+        >
+          Decode
+        </button>
+        <p>Result of decode is {{ decodedResult }}</p>
+      </div>
+    </div>
+
+    <h1 class="subtitle has-text-centered has-text-warning-dark">{{ encodedWarning }}</h1>
 
     <div class="buttons mt-5">
-      <button class="button is-success" @click="downloadKey">
+      <button :disabled="isDownloadKeyDisabled" class="button is-success" @click="downloadKey">
         Download key
       </button>
-      <button class="button is-success" @click="downloadEncryptedData">
+      <button
+        :disabled="isDownloadEncryptedDataDisabled"
+        class="button is-success"
+        @click="downloadEncryptedData"
+      >
         Download encrypted data
       </button>
     </div>
@@ -35,51 +61,81 @@
 </template>
 
 <script>
-import * as utils from "../utils/utils";
+import { Http } from '@/plugins/axios';
+import { generateRandomString, textToBinary, binaryToChar } from '@/utils/utils';
 
 export default {
-  data: function () {
+  data: function() {
     return {
-      text: "",
+      userInputData: null,
       randomKey: null,
       encodedResult: null,
       decodedResult: null,
     };
   },
+  computed: {
+    isGenerateKeyDisabled() {
+      return !this.userInputData;
+    },
+    isEncryptDecryptControlsDisabled() {
+      return !this.userInputData || !this.randomKey;
+    },
+    isDownloadKeyDisabled() {
+      return !this.randomKey;
+    },
+    isDownloadEncryptedDataDisabled() {
+      return !this.encodedResult;
+    },
+    encodedResultComputed() {
+      return binaryToChar(this.encodedResult);
+    },
+    encodedWarning() {
+      return `Warning: In the output string, there are ASCII characters that are not printable. Use another output type to view the complete output`;
+    },
+  },
   methods: {
     generateRandomKey() {
-      this.randomKey = utils.generateRandomString(this.text.length);
+      this.randomKey = generateRandomString(this.userInputData.length);
     },
-    decode() {
-      console.log("decode");
+    async decode() {
+      const payload = {
+        text: this.encodedResult,
+        key: textToBinary(this.randomKey),
+      };
+
+      try {
+        const response = await Http.post('/encode', {
+          ...payload,
+        });
+        this.decodedResult = binaryToChar(response?.data?.encoded);
+      } catch (e) {
+        console.log('e', e);
+      }
     },
     async encode() {
-      const binary = {
-        text: utils.textToBinary(this.text),
-        key: utils.textToBinary(this.randomKey),
+      const payload = {
+        text: textToBinary(this.userInputData),
+        key: textToBinary(this.randomKey),
       };
-      const res = await this.$axios.$post("http://localhost:3022/encode", {
-        ...binary,
-      });
-
-      console.log("encode", res);
+      try {
+        const response = await Http.post('/encode', {
+          ...payload,
+        });
+        this.encodedResult = response?.data?.encoded;
+      } catch (e) {
+        console.log('e', e);
+      }
     },
     downloadKey() {
-      this.createBlobFromContentAndDownloadFile(
-        this.randomKey,
-        "generated-key"
-      );
+      this.createBlobFromContentAndDownloadFile(this.randomKey, 'generated-key');
     },
     downloadEncryptedData() {
-      this.createBlobFromContentAndDownloadFile(
-        this.encodedResult,
-        "encoded-data"
-      );
+      this.createBlobFromContentAndDownloadFile(this.encodedResult, 'encoded-data');
     },
     createBlobFromContentAndDownloadFile(content, fileName) {
-      const blob = new Blob([content], { type: "text/plain" });
+      const blob = new Blob([content], { type: 'text/plain' });
       const fileUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = fileUrl;
       link.download = `${fileName}.txt`;
       document.body.appendChild(link);
@@ -90,3 +146,12 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.columns {
+  &:not(:last-child) {
+    margin-bottom: 0;
+  }
+  margin-top: 0;
+}
+</style>

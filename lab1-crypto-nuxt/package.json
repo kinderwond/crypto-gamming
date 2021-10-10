@@ -6,7 +6,11 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "prebuild:development": "cpy .env.development.example ./ --rename=.env",
+    "lint": "npm run lint:js",
+    "lintfix": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
+    "lint:js": "eslint --ext .js,.vue --ignore-path .gitignore ."
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.13.6",
@@ -15,6 +19,14 @@
     "nuxt": "^2.15.7"
   },
   "devDependencies": {
+    "@nuxtjs/dotenv": "^1.4.1",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "cpy-cli": "^3.1.1",
+    "eslint": "^7.32.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^7.19.1",
+    "eslint-webpack-plugin": "^3.0.1",
     "node-sass": "^6.0.1",
     "sass-loader": "^10"
   }

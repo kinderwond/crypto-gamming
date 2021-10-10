@@ -1,7 +1,8 @@
+require("dotenv").config()
 const express = require('express')
 const cors = require("cors")
 const {gamming} = require("./gamming")
-const port = 3022
+const port = process.env.PORT ?? 3022
 const bodyParser = require('body-parser')
 const jsonParser = bodyParser.json()
  

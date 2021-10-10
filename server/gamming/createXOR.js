@@ -1,81 +1,67 @@
-const puppeteer = require('puppeteer')
-const parseUrl = `http://xor.pw`
-
 /**
  * 
  * @param {*} text 
  * @param {*} key 
- * @param {object} options {
- *      textSystem - 2 in binary
- *      keySystem - 2 in binary 
- *      responseSystem - 2,16, 256
- * }
  * @returns 
  */
-const exec = async (text, key, options) => {
-
+const exec = async (text, key) => {
     text = text.split(" ")
     key = key.split(" ")
 
-    const page = await openBrowserAndGetPage(parseUrl,)
-    const encodedStr = await encodeText(text, key, page)
-    console.log(encodedStr.join(" "));
+    const encodedStr = await encodeBinaryText(text, key, 0)
     return encodedStr.join(" ")
 }
 
-async function encodeText(text, key, page) {
+/**
+ * @description compute XOR between to binary arrays
+ * @param {array} text 
+ * @param {array} key  
+ * @returns array ["1101", "1101", "110110"]
+ */
+async function encodeBinaryText(text, key, page) {
     const res = []
     for (let index in text) {
         const char = text[index]
-        if (!char) continue;
-        const encodedChar = await getEncodedXOR(page, char, key[index])
-        console.log("encodedCHAR", encodedChar);
+        if (!char) {
+            res.push(char)
+            continue;
+        }
+        const encodedChar = binaryXOR(char, key[index])
         res.push(encodedChar)
     }
     return res
 }
 
-async function getEncodedXOR(page, firstChar, secondChar) {
-    await page.waitForSelector('textarea')
-
-    // enter characters to encode
-    await page.evaluate(el => {
-        const calcButton = document.querySelector("button")
-        const textAreas = document.querySelectorAll("textarea")
-        const selects = document.querySelectorAll("select")
-        for (let select of selects) {
-            select.selectedIndex = 0
+function prepareBin(first, second) {
+    if (first.length > second.length) {
+        const limit = first.length - second.length
+        for (let i = 0; i < limit; i++) {
+            second = "0" + second
         }
-        textAreas[0].value = el.firstChar
-        textAreas[1].value = el.secondChar
-        calcButton.click()
-    }, {
-        firstChar,
-        secondChar
-    })
-
-    await page.waitForNavigation();
-
-    // enter characters to decode
-    const eval = await page.evaluate(async el => {
-        const selects = document.querySelectorAll("select")
-        for (let select of selects) {
-            select.selectedIndex = 0
+    } else if (second.length > first.length) {
+        const limit = second.length - first.length
+        for (let i = 0; i < limit; i++) {
+            first = "0" + first
         }
-        const textAreas = document.querySelectorAll("textarea")
-        return textAreas[2].value
-    })
-    return eval
+    }
+    return {
+        firstBin: first,
+        secondBin: second
+    }
+}
+const binaryXOR = (firstBinary, secondBinary) => {
+    const { firstBin, secondBin } = prepareBin(firstBinary, secondBinary)
+    return firstBin.split("").map((char, index) => {
+        const int = {
+            first: +char,
+            second: +secondBin[index]
+        }
+        return expressionToNumString(
+            (int.first && int.second) ||
+            (!int.first && !int.second)
+        )
+    }).join("")
 }
 
-async function openBrowserAndGetPage(url,) {
-    const browser = await puppeteer.launch(
-        { devtools: true }
-    );
-    const page = await browser.newPage();
-
-    await page.goto(url);
-
-    return page
-}
+const expressionToNumString = (expresion) => String(Number(!!expresion))
 module.exports = exec

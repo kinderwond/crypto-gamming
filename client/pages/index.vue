@@ -80,6 +80,7 @@ export default {
       randomKey: null,
       encodedResult: null,
       decodedResult: null,
+      encodedWarning: `Warning: In the output string, there are ASCII characters that are not printable. Use another output type to view the complete output`,
     };
   },
   computed: {
@@ -97,9 +98,6 @@ export default {
     },
     encodedResultToChar() {
       return binaryToChar(this.encodedResult);
-    },
-    encodedWarning() {
-      return `Warning: In the output string, there are ASCII characters that are not printable. Use another output type to view the complete output`;
     },
   },
   methods: {

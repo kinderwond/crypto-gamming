@@ -45,6 +45,7 @@ const execOperation = (operation, firstVal, secondVal) => {
     }
 }
 
+
 module.exports = {
     decorateArrays,
     execOperation

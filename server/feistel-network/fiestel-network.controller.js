@@ -34,6 +34,23 @@ const decodeRound = async (req, res) => {
         })
     }
 }
+const decode =  async (req, res) => {
+    try {
+        const {round, text, key} = req.body
+        /**
+         * TODO
+         * run all runds
+         */
+    }catch (e) {
+        console.log(`---POST--- { feistel } [decode] Error`);
+        console.trace(e)
+        res.status(500).json({
+            error: e
+        })
+    }
+}
 module.exports = {
-    encode
+    encode,
+    decode,
+    decodeRound
 }

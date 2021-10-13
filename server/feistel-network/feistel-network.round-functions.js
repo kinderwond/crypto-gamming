@@ -1,51 +1,51 @@
-const { binToDec, decToBin } = require('../scale-of-notation/scale-of-notation.helpers')
-
-
 const fn1 = (textBinArr, keyBinArr) => {
     const operationValue = 4
-    let mutatedArrays = {
-        text: [],
-        key: []
-    }
-    for (let i = 0 ; i < textBinArr.length; i++) {
-        let currentSymbols = {
-            text: binToDec(textBinArr[i]),
-            key: binToDec(keyBinArr[i])
+    return decorateArrays({
+        text: textBinArr,
+        key: keyBinArr,
+        operation: {
+            operation: "+",
+            value: operationValue
         }
-        currentSymbols.text += operationValue
-        currentSymbols.key += operationValue
-
-        mutatedArrays.text.push(decToBin(currentSymbols.text))
-        mutatedArrays.key.push(decToBin(currentSymbols.key))
-    }
-    return {
-        ...mutatedArrays
-    }
+    })
 }
 
 const fn2 = (textBinArr, keyBinArr) => {
     const operationValue = 13
-    let mutatedArrays = {
-        text: [],
-        key: []
-    }
-    for (let i = 0 ; i < textBinArr.length; i++) {
-        let currentSymbols = {
-            text: binToDec(textBinArr[i]),
-            key: binToDec(keyBinArr[i])
+    return decorateArrays({
+        text: textBinArr,
+        key: keyBinArr,
+        operation: {
+            operation: "-",
+            value: operationValue
         }
-        currentSymbols.text -= operationValue
-        currentSymbols.key -= operationValue
-
-        mutatedArrays.text.push(decToBin(currentSymbols.text))
-        mutatedArrays.key.push(decToBin(currentSymbols.key))
-    }
-    return {
-        ...mutatedArrays
-    }   
+    })
 }
-
+const revertFn1 = (textBinArr, keyBinArr) => {
+    const operationValue = 4
+    return decorateArrays({
+        text: textBinArr,
+        key: keyBinArr,
+        operation: {
+            operation: "-",
+            value: operationValue
+        }
+    })
+}
+const revertFn2 = (textBinArr, keyBinArr) => {
+    const operationValue = 13
+    return decorateArrays({
+        text: textBinArr,
+        key: keyBinArr,
+        operation: {
+            operation: "+",
+            value: operationValue
+        }
+    })
+}
 module.exports = {
     fn1,
-    fn2
+    fn2,
+    revertFn1,
+    revertFn2
 }

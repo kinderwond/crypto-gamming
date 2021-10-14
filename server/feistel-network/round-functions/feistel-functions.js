@@ -1,9 +1,11 @@
+const {decorateArrays} = require("./feistel-functions.helpers");
 const fn1 = (textBinArr, keyBinArr) => {
     const operationValue = 4
     return decorateArrays({
         text: textBinArr,
         key: keyBinArr,
         operation: {
+
             operation: "+",
             value: operationValue
         }

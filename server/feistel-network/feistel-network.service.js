@@ -1,12 +1,12 @@
-const { gamming } = require('../gamming')
+const {gamming} = require('../gamming')
 const {
     fn1,
     fn2,
     revertFn1,
     revertFn2
-} = require("./feistel-network.round-functions")
+} = require("./round-functions/feistel-functions")
 /**
- * 
+ *
  * @param {*} options  {
  *   roundCounter: number
  *   key: string[] - array of binaries
@@ -14,8 +14,8 @@ const {
  * }
  */
 const run = (options) => {
-    const { key, text } = options || {}
-    let { roundCounter } = options || {}
+    const {key, text} = options || {}
+    let {roundCounter} = options || {}
     console.log(`{ feistel service } run text`);
     console.log(text);
     let roundArr = [...text]
@@ -31,12 +31,16 @@ const run = (options) => {
 }
 
 /**
- * 
+ *
  * @param {*} charactersArr
- * @param {*} key 
+ * @param {*} key
  */
-const runRound = (charactersArr, key) => {
+const runRound = ({text, key, round, isDecoding}) => {
 
+
+    const roundFn = getRoundFn(round, isDecoding)
+    const mutated = roundFn({text, key})
+    console.log("Mutated text and key", mutated)
     // const arrLen = charactersArr.length
     // const halfArrLen = Math.floor(arrLen / 2)
     // const halfs = {
@@ -52,7 +56,6 @@ const runRound = (charactersArr, key) => {
     // return [...arr]
 }
 
-
 const switchTwoHalfs = (arr) => {
     const len = arr.length
     const halfLen = Math.floor(len / 2)
@@ -66,11 +69,16 @@ const switchTwoHalfs = (arr) => {
 const getRoundFn = (num, isReverting) => {
     const fn1Rounds = [1, 3, 6, 8, 9, 10, 14, 15]
     const fn2Rounds = [2, 4, 5, 7, 11, 12, 13]
-    const isFirstFn = fn1Rounds.find(num)
 
+    //return revert functions
+    if (isReverting) {
+        if (fn1Rounds.find(num)) return revertFn1
+        if (fn2Rounds.find(num)) return revertFn2
+    }
+    if (fn1Rounds.find(num)) return fn1
+    if (fn2Rounds.find(num)) return fn2
+    throw new Error("Invalid round! Pass 1 <= n <= 16")
 }
-
-
 
 
 module.exports = {

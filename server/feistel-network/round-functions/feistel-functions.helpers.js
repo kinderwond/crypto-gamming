@@ -1,4 +1,4 @@
-const { binToDec, decToBin } = require('../scale-of-notation/scale-of-notation.helpers')
+const { binToDec, decToBin } = require('../../scale-of-notation/scale-of-notation.helpers')
 /**
  * @description run feistel network functions flow
  * @param {*} param {
@@ -44,7 +44,6 @@ const execOperation = (operation, firstVal, secondVal) => {
             return firstVal / secondVal
     }
 }
-
 
 module.exports = {
     decorateArrays,

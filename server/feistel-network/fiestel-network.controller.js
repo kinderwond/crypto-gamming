@@ -1,10 +1,8 @@
+const service = require("./feistel-network.service")
 const encode = async (req, res) => {
     try {
-        let { text, key } = req.body
-        text = text.split(" ")
-        key = key.split(" ")
-        const encoded = await createfeistelNetwork({
-            roundCounnter: process.env.FEISTEL_COUNTER || 4,
+        let {text, key} = req.body
+        const encoded = service.runFeistelNetwork({
             text,
             key
         })
@@ -19,14 +17,14 @@ const encode = async (req, res) => {
         })
     }
 }
-const decodeRound = async (req, res) => {
+const encodeRound = async (req, res) => {
     try {
         const {round, text, key} = req.body
-        /**
-         * TODO
-         * run one round
-         */
-    }catch (e) {
+        if (round < 1 || round > 16) {
+            throw new Error("Round should be 1 <= n <= 16")
+        }
+        console.log("")
+    } catch (e) {
         console.log(`---POST--- { feistel } [decodeRound] Error`);
         console.trace(e)
         res.status(500).json({
@@ -34,14 +32,26 @@ const decodeRound = async (req, res) => {
         })
     }
 }
-const decode =  async (req, res) => {
+const decodeRound = async (req, res) => {
+    try {
+        const {round, text, key} = req.body
+        console.log("")
+    } catch (e) {
+        console.log(`---POST--- { feistel } [decodeRound] Error`);
+        console.trace(e)
+        res.status(500).json({
+            error: e
+        })
+    }
+}
+const decode = async (req, res) => {
     try {
         const {round, text, key} = req.body
         /**
          * TODO
          * run all runds
          */
-    }catch (e) {
+    } catch (e) {
         console.log(`---POST--- { feistel } [decode] Error`);
         console.trace(e)
         res.status(500).json({
@@ -51,6 +61,7 @@ const decode =  async (req, res) => {
 }
 module.exports = {
     encode,
+    encodeRound,
     decode,
     decodeRound
 }

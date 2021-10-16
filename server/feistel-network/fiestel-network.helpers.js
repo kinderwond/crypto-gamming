@@ -4,6 +4,20 @@ const prepareBinary = (bin) => {
     }
     return bin
 }
+const getFirstArrHalf = (arr) => {
+    return arr.slice(
+        0,
+        Math.floor(arrl.length / 2)
+    )
+}
+const getSecondArrHalf = (arr) => {
+    return arr.slice(
+        0,
+        Math.floor(arrl.length / 2)
+    )
+}
 module.exports = {
-    prepareBinary
+    prepareBinary,
+    getFirstArrHalf,
+    getSecondArrHalf
 }

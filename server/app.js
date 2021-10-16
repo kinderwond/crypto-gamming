@@ -24,7 +24,7 @@ app.post("/transcode", jsonParser, async (req, res) => {
         const { text, key } = req.body
         const encoded = await gamming(text, key)
         res.status(200).json({
-            transcodedResult: encoded
+            transcodedResult: encoded.join(" ")
         })
     } catch (e) {
         console.log(`Erroe`);

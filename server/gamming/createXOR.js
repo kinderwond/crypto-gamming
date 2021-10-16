@@ -9,7 +9,7 @@ const exec = async (text, key) => {
     key = key.split(" ")
 
     let encodedStr = await encodeBinaryText(text, key, 0)
-    encodedStr = encodedStr.filter(elem  => !!elem).join(" ")
+    encodedStr = encodedStr.filter(elem  => !!elem)
     return encodedStr
 }
 

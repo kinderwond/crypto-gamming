@@ -23,7 +23,15 @@ const encodeRound = async (req, res) => {
         if (round < 1 || round > 16) {
             throw new Error("Round should be 1 <= n <= 16")
         }
-        console.log("")
+        const result = service.runRound({
+            text,
+            key,
+            round,
+            isDecoding: false
+        })
+        return res.status(200).json({
+            result
+        })
     } catch (e) {
         console.log(`---POST--- { feistel } [decodeRound] Error`);
         console.trace(e)
@@ -35,7 +43,18 @@ const encodeRound = async (req, res) => {
 const decodeRound = async (req, res) => {
     try {
         const {round, text, key} = req.body
-        console.log("")
+        if (round < 1 || round > 16) {
+            throw new Error("Round should be 1 <= n <= 16")
+        }
+        const result = service.runRound({
+            text,
+            key,
+            round,
+            isDecoding: true
+        })
+        return res.status(200).json({
+            result
+        })
     } catch (e) {
         console.log(`---POST--- { feistel } [decodeRound] Error`);
         console.trace(e)

@@ -82,6 +82,6 @@ const getRoundFn = (num, isReverting) => {
 }
 
 module.exports = {
-    runRound,ё
+    runRound,
     runFeistelNetwork
 }

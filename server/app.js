@@ -1,21 +1,22 @@
 require("dotenv").config()
 const express = require('express')
 const cors = require("cors")
-const { gamming } = require("./gamming")
-const port = process.env.PORT ?? 3022
 const bodyParser = require('body-parser')
-const jsonParser = bodyParser.json()
 
-// create application/x-www-form-urlencoded parser
+const { gamming } = require("./gamming")
+const jsonParser = bodyParser.json()
+const port = process.env.PORT || 3022
 
 const app = express()
-app.use(cors())
 
+require("./feistel-network/feistel-network.routes")(app, jsonParser)
+app.use(cors())
 app.get('/', (req, res) => {
     res.send({
         msg: 'Hello World!'
     })
 })
+
 app.post("/transcode", jsonParser, async (req, res) => {
 
     try {

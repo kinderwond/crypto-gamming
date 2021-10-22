@@ -12,7 +12,7 @@
       <div class="columns">
         <div class="column">
           <button
-            :disabled="currentRound !== idx || isGenerateKeyDisabled"
+            :disabled="isGenerateKeyDisabled(idx)"
             class="button is-primary is-light"
             @click="generateRandomKey"
           >
@@ -22,7 +22,7 @@
           <div class="control mt-2">
             <input
               v-model="round.randomKey"
-              :disabled="currentRound !== idx || isRandomKeyDisabled"
+              :disabled="isRandomKeyDisabled(idx)"
               class="input"
               type="text"
               placeholder="Enter you random key"
@@ -34,9 +34,9 @@
       <div class="columns">
         <div class="column">
           <button
-            :disabled="currentRound !== idx || isEncryptDecryptControlsDisabled"
+            :disabled="isEncryptDecryptControlsDisabled(idx)"
             class="button mt-2 is-primary is-one-fifth"
-            @click="encode"
+            @click="encode(idx)"
           >
             Encode
           </button>
@@ -44,13 +44,14 @@
         </div>
         <div class="column">
           <button
-            :disabled="currentRound !== idx || isEncryptDecryptControlsDisabled"
+            :disabled="isNextRoundDisabled(idx)"
             class="button mt-2 is-primary"
-            @click="decode"
+            @click="decode(idx)"
           >
             {{ decodeMessage }}
           </button>
           <p>Result of decode is {{ round.decodedResult }}</p>
+          <p v-if="maxRoundHint" class="has-text-danger">{{ maxRoundHint }}</p>
         </div>
       </div>
     </div>
@@ -58,15 +59,11 @@
 </template>
 
 <script>
-import { generateRandomString, getErrorMessage } from '@/utils/utils';
-// import * as cryptoApi from '@/services/crypto-api';
+import { binaryToChar, generateRandomString, getErrorMessage, textToBinary } from '@/utils/utils';
+import * as cryptoApi from '@/services/crypto-api';
 
 export default {
   data: () => ({
-    // userInputData: null,
-    // randomKey: null,
-    // encodeResult: null,
-    // decodedResult: null,
     currentRound: 0,
     maxRound: 16,
     rounds: [
@@ -75,73 +72,85 @@ export default {
         randomKey: null,
         encodeResult: null,
         decodedResult: null,
+        hasNextRoundForm: false,
       },
     ],
   }),
   computed: {
-    isGenerateKeyDisabled() {
-      // return !this.userInputData;
-      return !this.getCurrentRound.userData;
-    },
-    isEncryptDecryptControlsDisabled() {
-      // return !this.userInputData || !this.randomKey;
-      return !this.getCurrentRound.userData || !this.getCurrentRound.randomKey;
-    },
-    isRandomKeyDisabled() {
-      return !this.getCurrentRound.randomKey;
-    },
     getCurrentRound() {
       return this.rounds[this.rounds.length - 1];
     },
     decodeMessage() {
       return this.currentRound === 0 ? 'Start round' : 'Next round';
     },
+    maxRoundHint() {
+      return this.currentRound === this.maxRound ? 'You have reached the maximum round' : '';
+    },
   },
   methods: {
+    isGenerateKeyDisabled(idx) {
+      return !this.rounds[idx].userData;
+    },
+    isEncryptDecryptControlsDisabled(idx) {
+      return !this.rounds[idx].userData || !this.rounds[idx].randomKey;
+    },
+    isRandomKeyDisabled(idx) {
+      return !this.rounds[idx].randomKey;
+    },
+    isNextRoundDisabled(idx) {
+      return this.currentRound === this.maxRound || this.isEncryptDecryptControlsDisabled(idx);
+    },
     generateRandomKey() {
-      // this.randomKey = generateRandomString(this.userInputData.length);
       this.getCurrentRound.randomKey = generateRandomString(this.getCurrentRound.userData.length);
     },
-    async encode() {
-      console.log('encode');
+    checkIfNextRoundHasForm(idx) {
+      if (!this.rounds[idx].hasNextRoundForm) {
+        this.rounds.push({
+          userData: null,
+          randomKey: null,
+          encodeResult: null,
+          decodedResult: null,
+          hasNextRoundForm: false,
+        });
+      }
+      this.rounds[idx].hasNextRoundForm = true;
+    },
+    async encode(round) {
+      console.log('encode round', round);
       const payload = {
-        currentRound: this.currentRound,
-        userData: this.getCurrentRound.userData,
-        key: this.getCurrentRound.randomKey,
+        round: this.currentRound + 1,
+        text: textToBinary(this.getCurrentRound.userData),
+        key: textToBinary(this.getCurrentRound.randomKey),
       };
 
       try {
-        const response = Math.random();
-        // const response = await cryptoApi.feistelEndpoint('encode', payload);
-        console.log('response', response, payload);
-        // this.encodeResult = response;
-        this.getCurrentRound.encodeResult = response;
+        const response = await cryptoApi.feistelEndpoint('encode', payload);
+        console.log('encode response', response);
+        this.getCurrentRound.encodeResult = binaryToChar(response?.result?.text);
+
+        this.currentRound += 1;
+        this.checkIfNextRoundHasForm(round);
+        this.rounds[this.currentRound].randomKey = binaryToChar(response?.result?.mutatedKey);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));
       }
     },
-    async decode() {
-      console.log('decode');
-      this.currentRound += 1;
-
-      this.rounds.push({
-        userData: '',
-        randomKey: '',
-      });
-      // MAke a request
+    async decode(round) {
+      console.log('decode round', round);
       const payload = {
-        currentRound: this.currentRound,
-        userData: this.getCurrentRound.userData,
-        key: this.getCurrentRound.randomKey,
+        round: this.currentRound + 1,
+        text: textToBinary(this.getCurrentRound.userData),
+        key: textToBinary(this.getCurrentRound.randomKey),
       };
 
       try {
-        const response = Math.random();
-        // const response = await cryptoApi.feistelEndpoint('decode', payload);
-        console.log('response', response, payload);
-        // this.decodedResult = response;
-        this.getCurrentRound.decodedResult = response;
+        const response = await cryptoApi.feistelEndpoint('decode', payload);
+        console.log('decode response', response, payload);
+        this.getCurrentRound.decodedResult = binaryToChar(response?.result?.text);
+
+        this.currentRound += 1;
+        this.checkIfNextRoundHasForm(round);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));

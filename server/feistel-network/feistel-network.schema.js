@@ -15,34 +15,37 @@ module.exports = {
             console.log("{ text } formatted value", value);
             const isOneBinary = value.length === 1
             if (isOneBinary && !isWordBinary(value[0])) {
-                console.log("ONE BINARY");
+                // console.log("ONE BINARY");
                 return helpers.message("Text should be binary (one)")
             }
 
             if (!isStringsBinary(value)) {
-                console.log("TEXT BINARY");
+                // console.log("TEXT BINARY");
                 return helpers.message("Text should be binary (two)")
             }
 
             return true
         }),
+        round: required(),
         key: custom((value, helpers) => {
             if (!value) {
                 return helpers.message("Key should be required")
             }
             if (typeof value !== "string") {
-                return helpers.message("Ket should be binary string")
+                return helpers.message("Key should be binary string")
             }
-            value = String(value).split(" ").filter(elem => !!elem)
+
+            value = String(value).split(/\s/g).filter(elem => !!elem)
+            console.log("{ text } formatted value", value);
             const isOneBinary = value.length === 1
-            console.log("{ key } formatted value", value);
             if (isOneBinary && !isWordBinary(value[0])) {
-                return helpers.message("Key should be binary")
+                // console.log("ONE BINARY");
+                return helpers.message("Key should be binary (one)")
             }
-            console.log("{ key } is string binary", value, isStringBinary(value));
-            if (!isStringBinary(value)) {
-                console.log("LONG KEY INVALID");
-                return helpers.message("Key should be binary")
+
+            if (!isStringsBinary(value)) {
+                // console.log("TEXT BINARY");
+                return helpers.message("Key should be binary (two)")
             }
 
             return true

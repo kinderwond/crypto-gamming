@@ -52,11 +52,14 @@ const runRound = ({text, key, round, isDecoding}) => {
         second: helpers.getSecondArrHalf(text)
     }
     //3)
+    console.log("roundfN", roundFn);
     const mutated = roundFn({ text: halfs.second,  key })
+    console.log(`<--- feistel network --> __service__ { runROund } mutated`, mutated);
     //4)
     const gammingRes = gamming(mutated.text, mutated.key)
 
     //5)
+    console.log("gammingres", gammingRes);
     const roundInfo = {
         text: [...gammingRes,  halfs.first],
         mutatedKey: mutated.key,
@@ -68,6 +71,10 @@ const runRound = ({text, key, round, isDecoding}) => {
 }
 
 const getRoundFn = (num, isReverting) => {
+    num = Number(num)
+    if (Number.isNaN(num) || !Number.isInteger(num)) {
+        throw new Error("{ getRoundFn } number round is not integer")
+    }
     const fn1Rounds = [1, 3, 6, 8, 9, 10, 14, 15]
     const fn2Rounds = [2, 4, 5, 7, 11, 12, 13]
 
@@ -76,8 +83,9 @@ const getRoundFn = (num, isReverting) => {
         if (fn1Rounds.find(num)) return roundFn.revertFn1
         if (fn2Rounds.find(num)) return roundFn.revertFn2
     }
-    if (fn1Rounds.find(num)) return roundFn.fn1
-    if (fn2Rounds.find(num)) return roundFn.fn2
+    // console.log(fn1Rounds, fn2Rounds.indexOf(num), fn1Rounds.find(num));
+    if (fn1Rounds.indexOf(num) != -1) return roundFn.fn1
+    if (fn2Rounds.indexOf(num) != -1) return roundFn.fn2
     throw new Error("Invalid round! Pass 1 <= n <= 16")
 }
 

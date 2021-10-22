@@ -10,7 +10,10 @@ const { binToDec, decToBin } = require('../../scale-of-notation/scale-of-notatio
  *   }
  * }
  */
-const decorateArrays = ({ text, key, operation }) => {
+const decorateArrays = (options) => {
+    console.log("{ decorate arrays } input");
+    console.log(options);
+    const {text: textBinArr, key: keyBinArr, operation} = options || {}
     let mutatedArrays = {
         text: [],
         key: []

@@ -4,12 +4,14 @@
  * @param {*} key 
  * @returns 
  */
-const exec = async (text, key) => {
-    text = text.split(" ")
-    key = key.split(" ")
+const exec = (text, key) => {
+    if (typeof text === "string")
+        text = text.split(" ")
+    if (typeof key === "string")
+        key = key.split(" ")
 
-    let encodedStr = await encodeBinaryText(text, key, 0)
-    encodedStr = encodedStr.filter(elem  => !!elem)
+    let encodedStr = encodeBinaryText(text, key, 0)
+    encodedStr = encodedStr.filter(elem => !!elem)
     return encodedStr
 }
 
@@ -19,7 +21,7 @@ const exec = async (text, key) => {
  * @param {array} key  
  * @returns array ["1101", "1101", "110110"]
  */
-async function encodeBinaryText(text, key, page) {
+function encodeBinaryText(text, key, page) {
     const res = []
     for (let index in text) {
         const char = text[index]
@@ -51,6 +53,7 @@ function prepareBin(first, second) {
     }
 }
 const binaryXOR = (firstBinary, secondBinary) => {
+    console.log("binaryXOR input", firstBinary);
     const { firstBin, secondBin } = prepareBin(firstBinary, secondBinary)
     return firstBin.split("").map((char, index) => {
         const int = {
@@ -65,4 +68,5 @@ const binaryXOR = (firstBinary, secondBinary) => {
 }
 
 const expressionToNumString = (expresion) => String(Number(!!expresion))
+
 module.exports = exec

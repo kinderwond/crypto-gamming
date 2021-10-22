@@ -31,6 +31,7 @@ function decToBin(x) {
         i = i * 10;
     }
     console.log(`Binary: ${bin}`);
+    return String(bin)
 }
 
 module.exports = {

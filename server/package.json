@@ -4,6 +4,7 @@
   "description": "",
   "main": "constants.js",
   "scripts": {
+    "dev": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nedilko Ivan and Novikov Nikita",

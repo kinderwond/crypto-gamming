@@ -1,8 +1,9 @@
-const service = require("./feistel-network.service")
+const services = require("./feistel-network.service")
+const mappers = require("./feistel-network.mapper")
 const encode = async (req, res) => {
     try {
-        let {text, key} = req.body
-        const encoded = service.runFeistelNetwork({
+        let { text, key } = req.body
+        const encoded = services.runFeistelNetwork({
             text,
             key
         })
@@ -19,18 +20,18 @@ const encode = async (req, res) => {
 }
 const encodeRound = async (req, res) => {
     try {
-        const {round, text, key} = req.body
+        const { round, text, key } = req.body
         if (round < 1 || round > 16) {
             throw new Error("Round should be 1 <= n <= 16")
         }
-        const result = service.runRound({
+        const result = services.runRound({
             text,
             key,
             round,
             isDecoding: false
         })
         return res.status(200).json({
-            result
+            result: mappers.mapTranscodeRound(result)
         })
     } catch (e) {
         console.log(`---POST--- { feistel } [decodeRound] Error`);
@@ -42,11 +43,11 @@ const encodeRound = async (req, res) => {
 }
 const decodeRound = async (req, res) => {
     try {
-        const {round, text, key} = req.body
+        const { round, text, key } = req.body
         if (round < 1 || round > 16) {
             throw new Error("Round should be 1 <= n <= 16")
         }
-        const result = service.runRound({
+        const result = services.runRound({
             text,
             key,
             round,
@@ -65,7 +66,7 @@ const decodeRound = async (req, res) => {
 }
 const decode = async (req, res) => {
     try {
-        const {round, text, key} = req.body
+        const { round, text, key } = req.body
         /**
          * TODO
          * run all runds

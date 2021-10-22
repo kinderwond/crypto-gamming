@@ -1,4 +1,4 @@
-const { custom, obj, required } = require('../validator/schemaTypes')
+const { custom, obj, required, max, min, int, double } = require('../validator/schemaTypes')
 const { isStringBinary, isWordBinary,  isStringsBinary } = require("../scale-of-notation/scale-of-notation.schema")
 module.exports = {
     // /encode, /decode routing
@@ -26,7 +26,7 @@ module.exports = {
 
             return true
         }),
-        round: required(),
+        round: double().integer().required().min(1).max(16),
         key: custom((value, helpers) => {
             if (!value) {
                 return helpers.message("Key should be required")

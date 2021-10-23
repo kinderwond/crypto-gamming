@@ -3,7 +3,7 @@
     <h1 class="title has-text-centered">Feistel</h1>
 
     <div v-for="(round, idx) in rounds" :key="idx" class="block-round">
-      <h1 class="subtitle has-text-centered">Round - {{ idx }}</h1>
+      <h1 class="subtitle has-text-centered">Round - {{ idx + 1 }}</h1>
       <label class="label mt-2">Enter you data</label>
       <div class="control">
         <input v-model="round.userData" class="input" type="text" placeholder="Enter you data" />
@@ -14,7 +14,7 @@
           <button
             :disabled="isGenerateKeyDisabled(idx)"
             class="button is-primary is-light"
-            @click="generateRandomKey"
+            @click="generateRandomKey(idx)"
           >
             Generate random key
           </button>
@@ -38,20 +38,15 @@
             class="button mt-2 is-primary is-one-fifth"
             @click="encode(idx)"
           >
-            Encode
+            {{ encodeMessage }}
           </button>
           <p>Result of encode is {{ round.encodeResult }}</p>
         </div>
         <div class="column">
-          <button
-            :disabled="isNextRoundDisabled(idx)"
-            class="button mt-2 is-primary"
-            @click="decode(idx)"
-          >
+          <button class="button mt-2 is-primary" @click="decode(idx)">
             {{ decodeMessage }}
           </button>
           <p>Result of decode is {{ round.decodedResult }}</p>
-          <p v-if="maxRoundHint" class="has-text-danger">{{ maxRoundHint }}</p>
         </div>
       </div>
     </div>
@@ -64,8 +59,8 @@ import * as cryptoApi from '@/services/crypto-api';
 
 export default {
   data: () => ({
-    currentRound: 0,
-    maxRound: 16,
+    currentRound: 1,
+    maxRound: 3,
     rounds: [
       {
         userData: null,
@@ -77,14 +72,11 @@ export default {
     ],
   }),
   computed: {
-    getCurrentRound() {
-      return this.rounds[this.rounds.length - 1];
+    encodeMessage() {
+      return this.currentRound === 1 ? 'Start encode round' : 'Next encode round';
     },
     decodeMessage() {
-      return this.currentRound === 0 ? 'Start round' : 'Next round';
-    },
-    maxRoundHint() {
-      return this.currentRound === this.maxRound ? 'You have reached the maximum round' : '';
+      return this.currentRound === 1 ? 'Start decode round' : 'Next decode round';
     },
   },
   methods: {
@@ -97,11 +89,11 @@ export default {
     isRandomKeyDisabled(idx) {
       return !this.rounds[idx].randomKey;
     },
-    isNextRoundDisabled(idx) {
-      return this.currentRound === this.maxRound || this.isEncryptDecryptControlsDisabled(idx);
+    generateRandomKey(idx) {
+      this.rounds[idx].randomKey = generateRandomString(this.rounds[idx].userData.length);
     },
-    generateRandomKey() {
-      this.getCurrentRound.randomKey = generateRandomString(this.getCurrentRound.userData.length);
+    checkIfShowErrorMessage() {
+      return this.currentRound === this.maxRound;
     },
     checkIfNextRoundHasForm(idx) {
       if (!this.rounds[idx].hasNextRoundForm) {
@@ -112,45 +104,55 @@ export default {
           decodedResult: null,
           hasNextRoundForm: false,
         });
+        this.currentRound += 1;
       }
       this.rounds[idx].hasNextRoundForm = true;
     },
-    async encode(round) {
-      console.log('encode round', round);
+    async encode(roundIdx) {
+      if (this.checkIfShowErrorMessage()) {
+        this.handleErrorMessage(
+          `You have reached the maximum round - ${this.maxRound}. You round is - ${this.currentRound}`
+        );
+        return;
+      }
+
       const payload = {
-        round: this.currentRound + 1,
-        text: textToBinary(this.getCurrentRound.userData),
-        key: textToBinary(this.getCurrentRound.randomKey),
+        round: roundIdx + 1,
+        text: textToBinary(this.rounds[roundIdx].userData),
+        key: textToBinary(this.rounds[roundIdx].randomKey),
       };
+
+      this.checkIfNextRoundHasForm(roundIdx);
 
       try {
         const response = await cryptoApi.feistelEndpoint('encode', payload);
         console.log('encode response', response);
-        this.getCurrentRound.encodeResult = binaryToChar(response?.result?.text);
-
-        this.currentRound += 1;
-        this.checkIfNextRoundHasForm(round);
-        this.rounds[this.currentRound].randomKey = binaryToChar(response?.result?.mutatedKey);
+        this.rounds[roundIdx].encodeResult = binaryToChar(response?.result?.text);
+        this.rounds[roundIdx].randomKey = binaryToChar(response?.result?.mutatedKey);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));
       }
     },
-    async decode(round) {
-      console.log('decode round', round);
+    async decode(roundIdx) {
+      if (this.checkIfShowErrorMessage()) {
+        this.handleErrorMessage('You have reached the maximum round');
+        console.log('max round has been reached');
+        return;
+      }
+
+      this.checkIfNextRoundHasForm(roundIdx);
+
       const payload = {
-        round: this.currentRound + 1,
-        text: textToBinary(this.getCurrentRound.userData),
-        key: textToBinary(this.getCurrentRound.randomKey),
+        round: roundIdx + 1,
+        text: textToBinary(this.rounds[roundIdx].userData),
+        key: textToBinary(this.rounds[roundIdx].randomKey),
       };
 
       try {
         const response = await cryptoApi.feistelEndpoint('decode', payload);
-        console.log('decode response', response, payload);
-        this.getCurrentRound.decodedResult = binaryToChar(response?.result?.text);
-
-        this.currentRound += 1;
-        this.checkIfNextRoundHasForm(round);
+        console.log('decode response', response);
+        this.rounds[roundIdx].decodedResult = binaryToChar(response?.result?.text);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));

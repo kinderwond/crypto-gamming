@@ -9,8 +9,8 @@ const port = process.env.PORT || 3022
 
 const app = express()
 
-require("./feistel-network/feistel-network.routes")(app, jsonParser)
 app.use(cors())
+require("./feistel-network/feistel-network.routes")(app, jsonParser)
 app.get('/', (req, res) => {
     res.send({
         msg: 'Hello World!'

@@ -20,6 +20,7 @@ export const generateRandomString = (length = 10) => {
  * @returns {string} - Binary string.
  */
 export function textToBinary(input) {
+  if (!input) return '';
   let res = '';
   for (let i = 0; i < input.length; i++) {
     res += input[i].charCodeAt(0).toString(2) + ' ';

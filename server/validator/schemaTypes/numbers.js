@@ -6,7 +6,13 @@ module.exports = {
     },
     double() {
         return joi.number()
-    }
+    },
 
+    min(num) {
+        return joi.min(num)
+    },
 
+    max(num) {
+        return joi.max(num)
+    },
 }

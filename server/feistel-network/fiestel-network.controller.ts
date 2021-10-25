@@ -32,7 +32,7 @@ export const encodeRound = async (req: Request, res: Response) => {
             text,
             key,
             round,
-            isDecoding: false
+            isDecoding: req.params.transcode === "decode"
         })
         const test: IMapTranscodeRound = {
             text: result.text,

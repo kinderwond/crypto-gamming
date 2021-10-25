@@ -45,6 +45,7 @@ export interface IRunRoundResult {
 
 const runRound = ({text, key, round, isDecoding}: IRunRound): IRunRoundResult => {
 
+    console.log("RUN ROUND", key)
     text = helpers.prepareBinary(text)
     const preparedKey: string[] = helpers.prepareBinary(key)
     /**

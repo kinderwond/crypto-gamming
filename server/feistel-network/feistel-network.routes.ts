@@ -10,7 +10,7 @@ const createUrl = (url: string): string => urlPrefix + url
 
 
 export default (app: Express, jsonParser: any) => {
-    app.post("/feistel/encode/round", validator.schema(schemas.codeRound), controllers.encodeRound)
+    app.post("/feistel/:transcode/round", validator.schema(schemas.codeRound), controllers.encodeRound)
 
-    app.post("/feistel/decode/round", controllers.decodeRound)
+    // app.post("/feistel/decode/round", controllers.decodeRound)
 }

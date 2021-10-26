@@ -111,7 +111,7 @@ export default {
       }
       this.rounds[idx].hasNextRoundForm = true;
     },
-    async encode(roundIdx) {
+    preRequest(roundIdx) {
       let isNeedReturn = false;
       if (this.checkIfShowErrorMessage(roundIdx)) {
         isNeedReturn = true;
@@ -121,6 +121,9 @@ export default {
       }
 
       this.checkIfNextRoundHasForm(roundIdx, isNeedReturn);
+    },
+    async encode(roundIdx) {
+      this.preRequest(roundIdx);
 
       const payload = {
         round: roundIdx + 1,
@@ -138,13 +141,7 @@ export default {
       }
     },
     async decode(roundIdx) {
-      let isNeedReturn = false;
-      if (this.checkIfShowErrorMessage(roundIdx)) {
-        isNeedReturn = true;
-        this.handleErrorMessage('You have reached the maximum round');
-      }
-
-      this.checkIfNextRoundHasForm(roundIdx, isNeedReturn);
+      this.preRequest(roundIdx);
 
       const payload = {
         round: roundIdx + 1,

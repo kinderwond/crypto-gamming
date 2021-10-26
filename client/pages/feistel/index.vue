@@ -92,10 +92,13 @@ export default {
     generateRandomKey(idx) {
       this.rounds[idx].randomKey = generateRandomString(this.rounds[idx].userData.length);
     },
-    checkIfShowErrorMessage() {
+    checkIfShowErrorMessage(roundIdx) {
+      if (roundIdx + 1 !== this.maxRound) return false;
       return this.currentRound === this.maxRound;
     },
-    checkIfNextRoundHasForm(idx) {
+    checkIfNextRoundHasForm(idx, isNeedReturn) {
+      if (isNeedReturn) return;
+
       if (!this.rounds[idx].hasNextRoundForm) {
         this.rounds.push({
           userData: null,
@@ -109,12 +112,15 @@ export default {
       this.rounds[idx].hasNextRoundForm = true;
     },
     async encode(roundIdx) {
-      if (this.checkIfShowErrorMessage()) {
+      let isNeedReturn = false;
+      if (this.checkIfShowErrorMessage(roundIdx)) {
+        isNeedReturn = true;
         this.handleErrorMessage(
           `You have reached the maximum round - ${this.maxRound}. You round is - ${this.currentRound}`
         );
-        return;
       }
+
+      this.checkIfNextRoundHasForm(roundIdx, isNeedReturn);
 
       const payload = {
         round: roundIdx + 1,
@@ -122,26 +128,23 @@ export default {
         key: textToBinary(this.rounds[roundIdx].randomKey),
       };
 
-      this.checkIfNextRoundHasForm(roundIdx);
-
       try {
         const response = await cryptoApi.feistelEndpoint('encode', payload);
-        console.log('encode response', response);
-        this.rounds[roundIdx].encodeResult = binaryToChar(response?.result?.text);
-        this.rounds[roundIdx].randomKey = binaryToChar(response?.result?.mutatedKey);
+        // we set needed data when we know that there is the next step available
+        this.handleResults(roundIdx, 'encodeResult', response);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));
       }
     },
     async decode(roundIdx) {
-      if (this.checkIfShowErrorMessage()) {
+      let isNeedReturn = false;
+      if (this.checkIfShowErrorMessage(roundIdx)) {
+        isNeedReturn = true;
         this.handleErrorMessage('You have reached the maximum round');
-        console.log('max round has been reached');
-        return;
       }
 
-      this.checkIfNextRoundHasForm(roundIdx);
+      this.checkIfNextRoundHasForm(roundIdx, isNeedReturn);
 
       const payload = {
         round: roundIdx + 1,
@@ -151,11 +154,19 @@ export default {
 
       try {
         const response = await cryptoApi.feistelEndpoint('decode', payload);
-        console.log('decode response', response);
-        this.rounds[roundIdx].decodedResult = binaryToChar(response?.result?.text);
+        console.log('response decode', response);
+        this.handleResults(roundIdx, 'decodedResult', response);
       } catch (e) {
         console.log('e', e);
         this.handleErrorMessage(getErrorMessage(e));
+      }
+    },
+    handleResults(roundIdx, pattern, response) {
+      if (this.rounds[roundIdx + 1]) {
+        this.rounds[roundIdx][pattern] = binaryToChar(response?.result?.text);
+        this.rounds[roundIdx + 1].randomKey = binaryToChar(response?.result?.mutatedKey);
+      } else {
+        this.rounds[roundIdx][pattern] = binaryToChar(response?.result?.text);
       }
     },
     handleErrorMessage(error) {
